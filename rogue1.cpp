@@ -24,6 +24,14 @@ struct Vec2 {
     }
 };
 
+struct Room {
+    int x, y, w, h;
+
+    void intersects(){}
+
+};
+
+
 struct Entity {
     Vec2 pos;
     char symbol;
@@ -37,18 +45,25 @@ struct Entity {
 class GameMap {
 private:
     int width, height;
-    Entity player;
     std::vector<char> data;
 
 public:
-    GameMap(int w, int h) : width(w), height(h), data(w * h, '#'), player(0, 0, '!', COLOR_PLAYER) {}
+    GameMap(int w, int h) : width(w), height(h), data(w * h, '#') {}
 
     char getCell(int x, int y) const {
+        if (x < 0 || x >= width || y < 0 || y >= height) return '#';
         return data[y * width + x];
     }
     
     void setCell(int x, int y, char val) {
-        data[y * width + x] = val;
+        if (x >= 0 && x < width && y >= 0 && y < height)
+            data[y * width + x] = val;
+    }
+
+    void fill(char symbol) {
+        for (auto& c : data) {
+            c = symbol;
+        }
     }
 
     int getWidth() const { return width; }
@@ -59,6 +74,7 @@ void render(const GameMap& map) {
     setCursorPosition(0, 0);
 
     std::string frame = "";
+
 
     for (int y = 0; y < map.getHeight(); y++) {
         for (int x = 0; x < map.getWidth(); x++) {
@@ -78,9 +94,10 @@ class Engine {
 private:
     bool running;
     GameMap Map;
+    Entity player;
 
 public:
-    Engine() : Map(40, 25), running(true) {}
+    Engine() : Map(40, 25), running(true), player(5, 5, '@', COLOR_PLAYER) {}
 
     void run(){
         HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -100,6 +117,8 @@ public:
 
 int main()
 {
+    srand(time(0));
     Engine game;
     game.run();
+    return 0;
 }
